@@ -23,7 +23,7 @@ public class DadosArduinoController {
 	private DadosArduinoRepository repository;
 
 	@GetMapping
-	public ResponseEntity<List<DadosArduino>> getAll() {
+	public ResponseEntity<List<DadosArduino>> getAllData() {
 		List<DadosArduino> findAll = repository.findAll();
 		return ResponseEntity.ok().body(findAll);
 	}
@@ -32,31 +32,28 @@ public class DadosArduinoController {
 	public ResponseEntity<List<DataDuracaoDTO>> getDataDuracaoPresencas() {
 		List<DataDuracaoDTO> result = new LinkedList<>();
 		List<DadosArduino> todosValores = repository.findAll();
-
 		LocalDateTime inicio = null;
 		LocalDateTime fim = null;
+		
 		for (int i = 0; i < todosValores.size(); i++) {
-			DadosArduino presenca = todosValores.get(i);
-			Long valor = presenca.getValor();
-			DadosArduino proximaPresenca = null;
-			DadosArduino presencaAnterior = null;
 			Long duracaoPresenca = 0L;
+			DadosArduino presencaAtual = todosValores.get(i);
+			Long valorAtual = presencaAtual.getValor();
 			Long proximoValor = null;
 			Long valorAnterior = null;
 
 			if (i > 0 && i < todosValores.size() - 2) {
-				proximaPresenca = todosValores.get(i + 1);
-				presencaAnterior = todosValores.get(i - 1);
-
-				proximoValor = proximaPresenca.getValor();
-				if (valor == 0 && proximoValor == 1 && inicio == null) {
-					inicio = presenca.getDataHora();
+				
+				proximoValor = todosValores.get(i + 1).getValor();
+				if (valorAtual == 0 && proximoValor == 1 && inicio == null) {
+					inicio = presencaAtual.getDataHora();
 				}
 
-				valorAnterior = presencaAnterior.getValor();
-				if (valor == 0 && valorAnterior == 1 && fim == null) {
-					fim = presenca.getDataHora();
+				valorAnterior = todosValores.get(i - 1).getValor();
+				if (valorAtual == 0 && valorAnterior == 1 && fim == null && inicio != null) {
+					fim = presencaAtual.getDataHora();
 				}
+				
 				if (inicio != null && fim != null) {
 					duracaoPresenca = Duration.between(inicio, fim).getSeconds();
 					result.add(new DataDuracaoDTO(inicio, duracaoPresenca));
